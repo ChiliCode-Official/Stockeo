@@ -1,6 +1,10 @@
 const fs = require('fs');
 
 const data = JSON.parse(fs.readFileSync('parsed-data.json', 'utf-8'));
+let extensions = {};
+try {
+    extensions = JSON.parse(fs.readFileSync('extensions.json', 'utf-8'));
+} catch(e) {}
 
 function sluggify(text) {
     return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -16,12 +20,15 @@ function generateDesc(p) {
 }
 
 const products = data.map((p, idx) => {
+    const slug = sluggify(p.name);
+    const id = slug + '-' + idx;
+    const ext = extensions[id] || 'jpg';
     return {
-        id: sluggify(p.name) + '-' + idx,
+        id: id,
         name: p.name,
         price: p.priceMenudeo || p.priceMayoreo || p.costMenudeo,
         category: p.category,
-        img: "https://placehold.co/400x400/151515/FFF?text=" + encodeURIComponent(p.name),
+        img: `images/productos/${id}.${ext}`,
         badge: p.notes && p.notes.toLowerCase().includes('promo') ? 'PROMO' : (p.notes && p.notes.toLowerCase().includes('best seller') ? 'TOP' : ''),
         desc: generateDesc(p)
     };
